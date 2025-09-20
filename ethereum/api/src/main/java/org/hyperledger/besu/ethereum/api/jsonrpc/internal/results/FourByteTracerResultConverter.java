@@ -16,7 +16,6 @@ package org.hyperledger.besu.ethereum.api.jsonrpc.internal.results;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.hyperledger.besu.datatypes.Address;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.processor.TransactionTrace;
 import org.hyperledger.besu.ethereum.core.Transaction;
 import org.hyperledger.besu.evm.tracing.TraceFrame;
@@ -24,8 +23,6 @@ import org.hyperledger.besu.evm.tracing.TraceFrame;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.slf4j.Logger;
@@ -43,19 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FourByteTracerResultConverter {
   private static final Logger LOG = LoggerFactory.getLogger(FourByteTracerResultConverter.class);
-  
-  // Common precompiled contract addresses (following Ethereum mainnet)
-  private static final Set<Address> COMMON_PRECOMPILES = Set.of(
-      Address.fromHexString("0x0000000000000000000000000000000000000001"), // ecRecover
-      Address.fromHexString("0x0000000000000000000000000000000000000002"), // sha256
-      Address.fromHexString("0x0000000000000000000000000000000000000003"), // ripemd160
-      Address.fromHexString("0x0000000000000000000000000000000000000004"), // identity
-      Address.fromHexString("0x0000000000000000000000000000000000000005"), // modexp
-      Address.fromHexString("0x0000000000000000000000000000000000000006"), // ecAdd
-      Address.fromHexString("0x0000000000000000000000000000000000000007"), // ecMul
-      Address.fromHexString("0x0000000000000000000000000000000000000008"), // ecPairing
-      Address.fromHexString("0x0000000000000000000000000000000000000009")  // blake2f
-  );
+
 
   /**
    * Converts a transaction trace to a 4byte tracer result.
@@ -78,8 +63,10 @@ public class FourByteTracerResultConverter {
     final Transaction transaction = transactionTrace.getTransaction();
     final List<TraceFrame> traceFrames = transactionTrace.getTraceFrames();
 
-    // Process the initial transaction call data
-    processCallData(transaction.getPayload(), selectorCounts);
+    // Process the initial transaction call data only for message-call transactions
+    if (transaction.getTo().isPresent()) {
+      processCallData(transaction.getPayload(), selectorCounts);
+    }
 
     // Process all trace frames for additional function calls
     if (traceFrames != null) {
@@ -147,10 +134,9 @@ public class FourByteTracerResultConverter {
       return false;
     }
     
-    // Skip precompiled contracts
-    final Address recipient = frame.getRecipient();
-    if (recipient != null && COMMON_PRECOMPILES.contains(recipient)) {
-      LOG.trace("Skipping precompiled contract at address: {}", recipient);
+    // Skip precompiled contracts (portable across forks/chains)
+    if (frame.isPrecompile()) {
+      LOG.trace("Skipping precompiled contract call");
       return false;
     }
     
