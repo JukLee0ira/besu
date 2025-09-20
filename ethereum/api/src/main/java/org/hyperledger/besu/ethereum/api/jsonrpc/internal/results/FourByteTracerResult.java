@@ -26,7 +26,7 @@ import java.util.Map;
  * The result is a map where the keys are SELECTOR-PARAMETERDATASIZE and the values are number of 
  * occurrences of this key.
  *
- * <p>Following Geth's implementation, the size represents len(input)-4, which is the size of the
+ * The size represents len(input)-4, which is the size of the
  * parameter data excluding the function selector.
  *
  * <p>For example:

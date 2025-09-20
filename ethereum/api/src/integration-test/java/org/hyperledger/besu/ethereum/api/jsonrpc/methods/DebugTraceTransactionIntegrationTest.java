@@ -144,7 +144,6 @@ public class DebugTraceTransactionIntegrationTest {
     
     // Verify that the function selector from the transaction input is captured
     // The transaction input 0x9dc2c8f5 should result in selector 0x9dc2c8f5 with parameter data size 0
-    // (following Geth's logic: len(input)-4, so 4-4=0 for a 4-byte input)
     assertThat(selectorCounts).containsKey("0x9dc2c8f5-0");
     assertThat(selectorCounts.get("0x9dc2c8f5-0")).isEqualTo(1);
   }

@@ -101,7 +101,7 @@ public class FourByteTracerResultConverter {
   /**
    * Processes call data to extract function selector and update counts.
    *
-   * <p>Following Geth's implementation: stores the 4-byte function selector along with the size
+   * Stores the 4-byte function selector along with the size
    * of the call data minus the 4-byte selector (i.e., the actual parameter data size).
    *
    * @param callData The call data to process
@@ -117,10 +117,10 @@ public class FourByteTracerResultConverter {
     final Bytes selector = callData.slice(0, 4);
     final String selectorHex = selector.toHexString();
     
-    // Following Geth's logic: use len(input)-4 (parameter data size, excluding selector)
+    // Use len(input)-4 (parameter data size, excluding selector)
     final int parameterDataSize = callData.size() - 4;
     
-    // Create the key in the format "selector-parameterdatasize" (matching Geth)
+    // Create the key in the format "selector-parameterdatasize" 
     final String key = selectorHex + "-" + parameterDataSize;
     
     // Update the count
@@ -133,7 +133,7 @@ public class FourByteTracerResultConverter {
   /**
    * Determines if a trace frame should be processed for 4byte analysis.
    * 
-   * <p>Following Geth's logic: only process CALL, CALLCODE, DELEGATECALL, and STATICCALL operations,
+   * Only process CALL, CALLCODE, DELEGATECALL, and STATICCALL operations,
    * excluding CREATE/CREATE2 and precompiled contracts.
    *
    * @param frame The trace frame to check
@@ -142,12 +142,12 @@ public class FourByteTracerResultConverter {
   private static boolean shouldProcessFrame(final TraceFrame frame) {
     final String opcode = frame.getOpcode();
     
-    // Only process specific call operations (following Geth's CaptureEnter logic)
+    // Only process specific call operations 
     if (!isRelevantCallOperation(opcode)) {
       return false;
     }
     
-    // Skip precompiled contracts (following Geth's isPrecompiled check)
+    // Skip precompiled contracts
     final Address recipient = frame.getRecipient();
     if (recipient != null && COMMON_PRECOMPILES.contains(recipient)) {
       LOG.trace("Skipping precompiled contract at address: {}", recipient);
@@ -162,7 +162,7 @@ public class FourByteTracerResultConverter {
   /**
    * Checks if the given opcode represents a relevant call operation for 4byte tracing.
    * 
-   * <p>Following Geth's implementation: only CALL, CALLCODE, DELEGATECALL, and STATICCALL
+   * Only CALL, CALLCODE, DELEGATECALL, and STATICCALL
    * are relevant. CREATE and CREATE2 are explicitly excluded.
    *
    * @param opcode The opcode to check
@@ -173,7 +173,7 @@ public class FourByteTracerResultConverter {
            "CALLCODE".equals(opcode) ||
            "DELEGATECALL".equals(opcode) ||
            "STATICCALL".equals(opcode);
-    // Note: CREATE and CREATE2 are intentionally excluded following Geth's logic
+    // Note: CREATE and CREATE2 are intentionally excluded 
   }
 }
 
